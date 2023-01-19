@@ -10,42 +10,53 @@ from utils import autocompletes, db
 log = logging.getLogger("mainLog")
 
 
-volume_options = [discord.SelectOption(label = "10"),
-                  discord.SelectOption(label = "20"),
-                  discord.SelectOption(label = "30"),
-                  discord.SelectOption(label = "40"),
-                  discord.SelectOption(label = "50"),
-                  discord.SelectOption(label = "60"),
-                  discord.SelectOption(label = "70"),
-                  discord.SelectOption(label = "80"),
-                  discord.SelectOption(label = "90"),
-                  discord.SelectOption(label = "100")]
-
-
-class SettingsView(discord.ui.View):
-    def __init__(self, setting):
-        self.setting = setting
+class SettingsSelectView(discord.ui.View):
+    def __init__(self):
         super().__init__(timeout = 300,
                          disable_on_timeout = True)
 
-    async def smart(self):
-        match self.setting:
+    @discord.ui.string_select(options = autocompletes.settings)
+    async def select_option(self, select: discord.ui.Select, interaction: discord.Interaction) -> None:
+        select.disabled = True
+        select.placeholder = str(select.values[0])
+        await interaction.message.edit(view = self)
+        match select.values[0]:
             case "statistics":
-                @discord.ui.channel_select(channel_types = [discord.ChannelType.text])
-                async def channel_select(self, select: discord.ui.Select, interaction: discord.Interaction) -> None:
-                    old_value = await db.insert_settings(setting_name = "statistics", setting = select.values[0].id, guild = interaction.guild_id)
-                    if old_value is None:
-                        em = discord.Embed(title = "Success", description = f"Set channel to <#{select.values}>", color = discord.Color.brand_green())
-                    else:
-                        em = discord.Embed(title = "Success", description = f"Updated channel from <#{old_value}> to {select.values}", color = discord.Color.brand_green())
-                    await interaction.response.send_message(embed = em)
-                    return
+
+                em = None
+                view = None
+
+                return await interaction.response.send_message(embed = em, view = view)
             case "volume":
-                @discord.ui.string_select(options = volume_options)
-                async def channel_select(self, select: discord.ui.Select, interaction: discord.Interaction) -> None:
-                    old_value = await db.insert_settings(setting_name = "volume", setting = select.values, guild = interaction.guild_id)
-                    await interaction.response.send_message(embed = )
-                return
+                return await interaction.response.send_modal(VolumeModal())
+
+            case _:
+                return None
+
+
+class VolumeModal(discord.ui.Modal):
+    def __init__(self, title: str = "Volume"):
+        self.title = title
+        super().__init__(title = self.title)
+        self.add_item(discord.ui.InputText(
+            label = "Set the Volume",
+            min_length = 1,
+            max_length = 4,
+            value = "25"
+        ))
+
+    async def callback(self, interaction: discord.Interaction):
+        try:
+            number = int(self.children[0].value)
+        except ValueError:
+            return await interaction.response.send_message("Please enter a valid number betweeen 1 and 1000")
+
+        db_return = await db.insert_settings(setting_name = "volume", setting = number, guild = interaction.guild_id)
+        if db_return is None:
+            await interaction.response.send_message(f"Set the volume to {number}%")
+        else:
+            await interaction.response.send_message(f"Changed the volume from {db_return[0]}% to {number}%")
+
 
 class Settings(commands.Cog):
     def __init__(self, client):
@@ -53,18 +64,9 @@ class Settings(commands.Cog):
         log.debug("Started Settings Cog")
 
     @commands.slash_command(name="settings", description="set configs for the bot")
-    async def settings(
-        self,
-        ctx: discord.ApplicationContext,
-        setting: discord.Option(
-            input_type=discord.SlashCommandOptionType.string,
-            name="setting",
-            description="wich setting are you editing",
-            autocomplete=autocompletes.settings,
-            required=True,
-        ),
-    ):
-        return await ctx.response.send_message("hi", view = SettingsView())
+    async def settings(self, ctx: discord.ApplicationContext):
+        em = discord.Embed(title = "Select what you want to edit", color = discord.Color.dark_gold())
+        await ctx.response.send_message(embed = em, view = SettingsSelectView())
 
 
 def setup(client):
