@@ -53,3 +53,13 @@ async def insert_settings(
                     return old_setting
     except Exception as e:
         log.error("Error whilst inserting setting", exc_info=e)
+
+
+async def get_setting(setting_name: str, guild_id: int, path: Path = config.DB_PATH) -> int:
+    async with aiosqlite.connect(path) as db:
+        async with db.cursor() as cursor:
+            await cursor.execute(
+                "SELECT setting FROM settings WHERE guild = ? AND setting_name = ?", (guild_id, setting_name)
+            )
+            setting = await cursor.fetchone()
+    return setting

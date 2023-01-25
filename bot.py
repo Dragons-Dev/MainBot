@@ -98,6 +98,12 @@ client = AnyClient(
 )
 
 
+@client.command()
+async def clear(ctx: commands.Context):
+    purge = await ctx.channel.purge()
+    await ctx.send(f"cleared {len(purge)} messages")
+
+
 if __name__ == "__main__":
-    client.load_extensions("cogs.music", "cogs.settings")
+    client.load_extensions("cogs.music v2", "cogs.settings")
     client.run(config.TOKEN)
