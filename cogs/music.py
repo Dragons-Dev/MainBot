@@ -24,14 +24,13 @@ async def add_queue(song: wavelink.abc.Playable, vc: wavelink.Player):
 
 class MusicView(discord.ui.View):
     def __init__(self, context: commands.Context, songs: list[wavelink.abc.Playable]):
-        super().__init__(timeout = 300,
-                         disable_on_timeout = True)
+        super().__init__(timeout=300, disable_on_timeout=True)
 
-    @discord.ui.button(label = "Select First", style = discord.ButtonStyle.blurple, emoji = "1️⃣")
+    @discord.ui.button(label="Select First", style=discord.ButtonStyle.blurple, emoji="1️⃣")
     async def select_first(self, button: discord.Button, interaction: discord.Interaction):
         button.disabled = True
         button.style = discord.ButtonStyle.green
-        await self.message.edit(view = self)
+        await self.message.edit(view=self)
         return await interaction.response.send_message("First Button")
 
 
@@ -53,9 +52,9 @@ class Music(commands.Cog):
         if isinstance(next_track, wavelink.QueueEmpty):
             player.cleanup()
             await player.stop()
-        await player.play(next_track, replace = False)
+        await player.play(next_track, replace=False)
 
-    @music.command(name = "play", description = "plays music with a given search")
+    @music.command(name="play", description="plays music with a given search")
     async def play(
         self,
         ctx: discord.ApplicationContext,
@@ -87,7 +86,7 @@ class Music(commands.Cog):
             return await ctx.response.send_message("You must be in the same voice channel as the bot.")
 
         client = ctx.guild.get_member(self.client.user.id)
-        await client.edit(deafen = True)
+        await client.edit(deafen=True)
 
         songs = await wavelink.YouTubeTrack.search(query=search, return_first=False)
         tracks = []
@@ -106,7 +105,7 @@ class Music(commands.Cog):
         music_selection.set_author(name="Query Results")
 
         try:
-            msg = await ctx.channel.send(embed=music_selection, view = MusicView())
+            msg = await ctx.channel.send(embed=music_selection, view=MusicView())
             await msg.add_reaction("1️⃣")
             await msg.add_reaction("2️⃣")
             await msg.add_reaction("3️⃣")
@@ -208,20 +207,18 @@ Duration: {utility.sec_to_min(song.length)}
         await vc.resume()
         return await ctx.response.send_message("Music playback resumed.")
 
-    @music.command(name = "queue", description = "queue shows the upcoming 5 songs from the queue")
+    @music.command(name="queue", description="queue shows the upcoming 5 songs from the queue")
     async def queue(self, ctx: discord.ApplicationContext):
         vc = ctx.guild.voice_client
         if not vc:  # check if the bot is not in a voice channel
-            vc = await ctx.author.voice.channel.connect(cls = wavelink.Player)  # connect to the voice channel
+            vc = await ctx.author.voice.channel.connect(cls=wavelink.Player)  # connect to the voice channel
 
         if ctx.author.voice.channel.id != vc.channel.id:  # check if the bot is not in the voice channel
             return await ctx.response.send_message("You must be in the same voice channel as the bot.")
 
         songs = vc.queue
         print(songs)
-        await ctx.response.send_message(embed = discord.Embed(
-            description = "returned smth"
-        ))
+        await ctx.response.send_message(embed=discord.Embed(description="returned smth"))
 
 
 def setup(bot):

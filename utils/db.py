@@ -26,9 +26,7 @@ async def setup_dbs(path: Path = config.DB_PATH) -> bool:
         log.error("Error whilst setting up databases", exc_info=e)
 
 
-async def insert_settings(
-    setting_name: str, setting: Any, guild: int, path: Path | str = config.DB_PATH
-) -> Any:
+async def insert_settings(setting_name: str, setting: Any, guild: int, path: Path | str = config.DB_PATH) -> Any:
     try:
         setting_name = setting_name.lower()
         async with aiosqlite.connect(path) as db:
