@@ -83,14 +83,13 @@ class AnyClient(commands.Bot):
         if not self.nodes_connected:
             """Connect to our Lavalink nodes."""
             await self.wait_until_ready()
-            await wavelink.NodePool.create_node(bot=self,
-                                                host="127.0.0.1",
-                                                port=2333,
-                                                password="youshallnotpass",
-                                                spotify_client = spotify.SpotifyClient(
-                                                    client_id = config.SPOTIFY_ID,
-                                                    client_secret = config.SPOTIFY_SECRET
-                                                ))
+            await wavelink.NodePool.create_node(
+                bot=self,
+                host="127.0.0.1",
+                port=2333,
+                password="youshallnotpass",
+                spotify_client=spotify.SpotifyClient(client_id=config.SPOTIFY_ID, client_secret=config.SPOTIFY_SECRET),
+            )
             self.nodes_connected = True
             log.info("Connected to Lavalink")
 
