@@ -1,7 +1,7 @@
-# Discord-Bot-Ultimate-Rewrite-Extended-Gild-Edition
+# Dragons Bot
 
-### The 6th or 7th update to the bot
-Since I am still too lazy to learn to use branches I use whole repos :)
-
+### This is the current state of development
+The rewrite of every bot I had before is still on going. <br>
+Currently my focus is on the music system.
 
 
